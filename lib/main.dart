@@ -32,6 +32,7 @@ class _HeartRateScreenState extends State<HeartRateScreen> {
   bool _alreadyConnecting = false;
 
   StreamSubscription? scanSub;
+  StreamSubscription? hrSub;
   BluetoothDevice? connectedDevice;
 
   @override
@@ -55,6 +56,7 @@ class _HeartRateScreenState extends State<HeartRateScreen> {
     });
 
     scanSub?.cancel();
+    hrSub?.cancel();
 
     scanSub = FlutterBluePlus.scanResults.listen((results) async {
       if (_alreadyConnecting) return;
@@ -62,7 +64,6 @@ class _HeartRateScreenState extends State<HeartRateScreen> {
         final name = r.advertisementData.localName.trim();
         // ignore: deprecated_member_use
         final deviceName = r.device.name.trim();
-        print("🔵 جهاز: '$deviceName' | '$name'");
         if (name.contains("K8") || deviceName.contains("K8")) {
           _alreadyConnecting = true;
           await FlutterBluePlus.stopScan();
@@ -72,6 +73,7 @@ class _HeartRateScreenState extends State<HeartRateScreen> {
         }
       }
     });
+
     await FlutterBluePlus.startScan(timeout: const Duration(seconds: 20));
   }
 
@@ -96,33 +98,44 @@ class _HeartRateScreenState extends State<HeartRateScreen> {
 
       final services = await device.discoverServices();
       BluetoothCharacteristic? writeChar;
+      BluetoothCharacteristic? notifyChar;
 
       for (var service in services) {
         for (var char in service.characteristics) {
           final uuid = char.uuid.toString().toLowerCase();
-
           if (uuid.contains("ff02")) writeChar = char;
-
-          if (uuid.contains("6e400003")) {
-            await char.setNotifyValue(true);
-            char.lastValueStream.listen((value) {
-              if (value.isEmpty) return;
-              if (value.length == 1 && value[0] >= 40 && value[0] <= 200) {
-                if (mounted) {
-                  setState(() {
-                    heartRate = value[0];
-                    status = "متصل بالساعة ❤️";
-                  });
-                }
-              }
-            });
-          }
+          if (uuid.contains("6e400003")) notifyChar = char;
         }
+      }
+
+      if (notifyChar != null) {
+        await notifyChar.setNotifyValue(true);
+
+        // ✅ الطريقة الصح في 1.14.0
+        hrSub = notifyChar.lastValueStream.listen(
+          (value) {
+            if (value.isEmpty) return;
+            print("💓 DATA: $value");
+            if (value.length == 1 &&
+                value[0] >= 40 &&
+                value[0] <= 200) {
+              if (mounted) {
+                setState(() {
+                  heartRate = value[0];
+                  status = "متصل بالساعة ❤️";
+                });
+              }
+            }
+          },
+          onError: (e) => print("❌ error: $e"),
+          cancelOnError: false,
+        );
       }
 
       if (writeChar != null) {
         await writeChar.write([0x15, 0x01, 0x01], withoutResponse: true);
       }
+
     } catch (e) {
       if (mounted) {
         setState(() {
@@ -143,6 +156,7 @@ class _HeartRateScreenState extends State<HeartRateScreen> {
 
   @override
   void dispose() {
+    hrSub?.cancel();
     scanSub?.cancel();
     connectedDevice?.disconnect();
     super.dispose();
