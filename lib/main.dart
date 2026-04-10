@@ -29,6 +29,7 @@ class _HeartRateScreenState extends State<HeartRateScreen> {
   int heartRate = 0;
   String status = "اضغطي للبحث عن ساعتك";
   bool isConnecting = false;
+  bool _alreadyConnecting = false;
 
   StreamSubscription? scanSub;
   BluetoothDevice? connectedDevice;
@@ -49,16 +50,21 @@ class _HeartRateScreenState extends State<HeartRateScreen> {
   void startListening() async {
     setState(() {
       isConnecting = true;
+      _alreadyConnecting = false;
       status = "جاري البحث عن الساعة...";
     });
 
     scanSub?.cancel();
 
     scanSub = FlutterBluePlus.scanResults.listen((results) async {
+      if (_alreadyConnecting) return;
       for (ScanResult r in results) {
-        final name = r.device.name.trim();
-        final localName = r.advertisementData.localName.trim();
-        if (name.contains("K8") || localName.contains("K8")) {
+        final name = r.advertisementData.localName.trim();
+        // ignore: deprecated_member_use
+        final deviceName = r.device.name.trim();
+        print("🔵 جهاز: '$deviceName' | '$name'");
+        if (name.contains("K8") || deviceName.contains("K8")) {
+          _alreadyConnecting = true;
           await FlutterBluePlus.stopScan();
           scanSub?.cancel();
           _connectToClock(r.device);
@@ -66,7 +72,6 @@ class _HeartRateScreenState extends State<HeartRateScreen> {
         }
       }
     });
-
     await FlutterBluePlus.startScan(timeout: const Duration(seconds: 20));
   }
 
@@ -83,6 +88,7 @@ class _HeartRateScreenState extends State<HeartRateScreen> {
               status = "تم فصل الاتصال";
               heartRate = 0;
               isConnecting = false;
+              _alreadyConnecting = false;
             });
           }
         }
@@ -91,58 +97,38 @@ class _HeartRateScreenState extends State<HeartRateScreen> {
       final services = await device.discoverServices();
       BluetoothCharacteristic? writeChar;
 
-      // ✅ اسمع على كل notify characteristic في كل الـ services
       for (var service in services) {
         for (var char in service.characteristics) {
           final uuid = char.uuid.toString().toLowerCase();
 
-          // احفظ ff02 للـ write
-          if (uuid.contains("ff02")) {
-            writeChar = char;
-          }
+          if (uuid.contains("ff02")) writeChar = char;
 
-          // اسمع على كل characteristic عنده notify
-          if (char.properties.notify) {
-            try {
-              await char.setNotifyValue(true);
-              print("✅ اشتركنا في: $uuid");
-
-              char.lastValueStream.listen((value) {
-                if (value.isEmpty) return;
-                print("📊 [$uuid] DATA: $value");
-
-                // ✅ النبض الحقيقي بيكون بين 50 و 150
-                for (int i = 0; i < value.length; i++) {
-                  if (value[i] >= 50 && value[i] <= 150) {
-                    print("💓 نبض محتمل index $i: ${value[i]}");
-                    if (mounted) {
-                      setState(() {
-                        heartRate = value[i];
-                        status = "متصل بالساعة ❤️";
-                      });
-                    }
-                    return;
-                  }
+          if (uuid.contains("6e400003")) {
+            await char.setNotifyValue(true);
+            char.lastValueStream.listen((value) {
+              if (value.isEmpty) return;
+              if (value.length == 1 && value[0] >= 40 && value[0] <= 200) {
+                if (mounted) {
+                  setState(() {
+                    heartRate = value[0];
+                    status = "متصل بالساعة ❤️";
+                  });
                 }
-              });
-            } catch (e) {
-              print("❌ notify error on $uuid: $e");
-            }
+              }
+            });
           }
         }
       }
 
-      // ✅ ابعت command على ff02
       if (writeChar != null) {
         await writeChar.write([0x15, 0x01, 0x01], withoutResponse: true);
-        print("✅ command أُرسل");
       }
-
     } catch (e) {
       if (mounted) {
         setState(() {
           status = "فشل الاتصال: $e";
           isConnecting = false;
+          _alreadyConnecting = false;
         });
       }
     }
