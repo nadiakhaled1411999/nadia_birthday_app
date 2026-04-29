@@ -30,6 +30,25 @@ class _HeartRateScreenState extends State<HeartRateScreen> {
   String status = "اضغطي للبحث عن ساعتك";
   bool isConnecting = false;
   bool _alreadyConnecting = false;
+  int _messageIndex = 0;
+
+  final List<String> _messages = [
+    "اوعي تستسلمي يا نادية، تعبك عمره ما هيضيع! 💪",
+    "تعبتي من المذاكرة؟ افتكري لحظة وصولك هتنسيكي كل تعب! 🌟",
+    "كل ساعة بتذاكريها دي خطوة أقرب للحلم! 📚",
+    "النجاح مش بييجي لوحده، انتي بتبنيه دلوقتي! ✨",
+    "صعبة بس مش مستحيلة، انتي أقوى من إنك تستسلمي! 🔥",
+    "كل تعبة بتتعبيها دلوقتي هتفرح بيها يوم الفرح! 🎓",
+    "إيمانك بنفسك أقوى من أي امتحان! 💫",
+    "انتي مش بتذاكري لنفسك بس، في ناس بتحلم بنجاحك! ❤️",
+    "التعب ده مؤقت، النجاح ده للأبد! 🏆",
+    "شدي حيلك يا نادية، الفجر قريب! 🌅",
+    "كل دقيقة بتذاكريها دي استثمار في مستقبلك! 💡",
+    "انتي بطلة حتى لو مش حاسة بده دلوقتي! 🦋",
+    "ربنا شايف تعبك وهيكافيكي! 🤲",
+    "مفيش حاجة اسمها مستحيل لما الإرادة تكون قوية! ⚡",
+    "فكري في هدفك وهيبقى كل حاجة أسهل! 🎯",
+  ];
 
   StreamSubscription? scanSub;
   StreamSubscription? hrSub;
@@ -111,18 +130,15 @@ class _HeartRateScreenState extends State<HeartRateScreen> {
       if (notifyChar != null) {
         await notifyChar.setNotifyValue(true);
 
-        // ✅ الطريقة الصح في 1.14.0
         hrSub = notifyChar.lastValueStream.listen(
           (value) {
             if (value.isEmpty) return;
-            print("💓 DATA: $value");
-            if (value.length == 1 &&
-                value[0] >= 40 &&
-                value[0] <= 200) {
+            if (value.length == 1 && value[0] >= 40 && value[0] <= 200) {
               if (mounted) {
                 setState(() {
                   heartRate = value[0];
                   status = "متصل بالساعة ❤️";
+                  _messageIndex++; // ✅ رسالة جديدة مع كل قياس
                 });
               }
             }
@@ -148,10 +164,8 @@ class _HeartRateScreenState extends State<HeartRateScreen> {
   }
 
   String getMessage() {
-    if (heartRate == 0) return "مستعدين نبدأ؟";
-    if (heartRate > 100) return "🔥 نبضك عالي من الحماس!";
-    if (heartRate > 60) return "💖 نبضك هادي وجميل";
-    return "😌 نبضك هادئ جداً";
+    if (heartRate == 0) return "مستعدين نبدأ؟ 😊";
+    return _messages[_messageIndex % _messages.length];
   }
 
   @override
