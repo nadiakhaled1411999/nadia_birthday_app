@@ -5,6 +5,14 @@ import 'dart:async';
 
 void main() => runApp(const FlutterHeartApp());
 
+// Constants
+const String _targetDeviceName = 'K8';
+const String _notifyCharUuid = '6e400003';
+const String _writeCharUuid = 'ff02';
+const int _heartRateMin = 40;
+const int _heartRateMax = 200;
+const List<int> _heartRateCommand = [0x15, 0x01, 0x01];
+
 class FlutterHeartApp extends StatelessWidget {
   const FlutterHeartApp({super.key});
 
@@ -26,66 +34,72 @@ class HeartRateScreen extends StatefulWidget {
 }
 
 class _HeartRateScreenState extends State<HeartRateScreen> {
-  int heartRate = 0;
-  String status = "اضغطي للبحث عن ساعتك";
-  bool isConnecting = false;
+  int _heartRate = 0;
+  String _status = 'اضغطي للبحث عن ساعتك';
+  bool _isConnecting = false;
   bool _alreadyConnecting = false;
   int _messageIndex = 0;
 
-  final List<String> _messages = [
-    "أوعي تستسلمي يا نادية، تعبك عمره ما هيضيع! 💪",
-    "تعبتي من المذاكرة؟ افتكري لحظة وصولك هتنسيكي كل تعب! 🌟",
-    "كل ساعة بتذاكريها دي خطوة أقرب للحلم! 📚",
-    "النجاح مش بييجي لوحده، إنتي بتبنيه دلوقتي! ✨",
-    "صعبة بس مش مستحيلة، إنتي أقوى من إنك تستسلمي! 🔥",
-    "ربنا مش غافل عنك يا نادية، كل تعبك محسوب! ❤️",
-    "إنتي مش بتذاكري لنفسك بس، في ناس بتحلم بنجاحك! 🌈",
-    "التعب ده مؤقت، النجاح ده للأبد! 🏆",
-    "شدي حيلك يا نادية، الفجر قريب! 🌅",
-    "كل دقيقة بتذاكريها دي استثمار في مستقبلك! 💡",
-    "إنتي بطلة حتى لو مش حاسة بده دلوقتي! 🦋",
-     "ربنا مش بيضيع أجر المجتهدين، شدي حيلك! 💫",
-    "مفيش حاجة اسمها مستحيل لما الإرادة تكون قوية! ⚡",
-    "فكري في هدفك وهيبقى كل حاجة أسهل! 🎯",
-  ];
+  StreamSubscription? _scanSub;
+  StreamSubscription? _hrSub;
+  BluetoothDevice? _connectedDevice;
 
-  StreamSubscription? scanSub;
-  StreamSubscription? hrSub;
-  BluetoothDevice? connectedDevice;
+  // Added motivational messages that change with each new heart rate reading
+  static const List<String> _messages = [
+    'أوعي تستسلمي يا نادية، تعبك عمره ما هيضيع! 💪',
+    'تعبتي من المذاكرة؟ افتكري لحظة وصولك هتنسيكي كل تعب! 🌟',
+    'كل ساعة بتذاكريها دي خطوة أقرب للحلم! 📚',
+    'النجاح مش بييجي لوحده، إنتي بتبنيه دلوقتي! ✨',
+    'صعبة بس مش مستحيلة، إنتي أقوى من إنك تستسلمي! 🔥',
+    'ربنا مش غافل عنك يا نادية، كل تعبك محسوب! ❤️',
+    'إنتي مش بتذاكري لنفسك بس، في ناس بتحلم بنجاحك! 🌈',
+    'التعب ده مؤقت، النجاح ده للأبد! 🏆',
+    'شدي حيلك يا نادية، الفجر قريب! 🌅',
+    'كل دقيقة بتذاكريها دي استثمار في مستقبلك! 💡',
+    'إنتي بطلة حتى لو مش حاسة بده دلوقتي! 🦋',
+    'ربنا مش بيضيع أجر المجتهدين، شدي حيلك! 💫',
+    'مفيش حاجة اسمها مستحيل لما الإرادة تكون قوية! ⚡',
+    'فكري في هدفك وهيبقى كل حاجة أسهل! 🎯',
+  ];
 
   @override
   void initState() {
     super.initState();
-    _askPermissions();
+    _requestPermissions();
   }
 
-  Future<void> _askPermissions() async {
+  Future<void> _requestPermissions() async {
     await [
       Permission.bluetoothScan,
       Permission.bluetoothConnect,
     ].request();
   }
 
-  void startListening() async {
+  bool _isTargetDevice(ScanResult r) {
+    final localName = r.advertisementData.localName.trim();
+    // ignore: deprecated_member_use
+    final deviceName = r.device.name.trim();
+    return localName.contains(_targetDeviceName) ||
+        deviceName.contains(_targetDeviceName);
+  }
+
+  void _startListening() async {
     setState(() {
-      isConnecting = true;
+      _isConnecting = true;
       _alreadyConnecting = false;
-      status = "جاري البحث عن الساعة...";
+      _status = 'جاري البحث عن الساعة...';
     });
 
-    scanSub?.cancel();
-    hrSub?.cancel();
+    _scanSub?.cancel();
+    _hrSub?.cancel();
 
-    scanSub = FlutterBluePlus.scanResults.listen((results) async {
+    _scanSub = FlutterBluePlus.scanResults.listen((results) async {
       if (_alreadyConnecting) return;
-      for (ScanResult r in results) {
-        final name = r.advertisementData.localName.trim();
-        // ignore: deprecated_member_use
-        final deviceName = r.device.name.trim();
-        if (name.contains("K8") || deviceName.contains("K8")) {
+      for (final r in results) {
+        if (_isTargetDevice(r)) {
           _alreadyConnecting = true;
           await FlutterBluePlus.stopScan();
-          scanSub?.cancel();
+          _scanSub?.cancel();
           _connectToClock(r.device);
           break;
         }
@@ -97,20 +111,18 @@ class _HeartRateScreenState extends State<HeartRateScreen> {
 
   Future<void> _connectToClock(BluetoothDevice device) async {
     try {
-      connectedDevice = device;
+      _connectedDevice = device;
       await device.connect(timeout: const Duration(seconds: 20));
-      if (mounted) setState(() => status = "جاري قياس النبض... ⏳");
+      if (mounted) setState(() => _status = 'جاري قياس النبض... ⏳');
 
       device.connectionState.listen((state) {
-        if (state == BluetoothConnectionState.disconnected) {
-          if (mounted) {
-            setState(() {
-              status = "تم فصل الاتصال";
-              heartRate = 0;
-              isConnecting = false;
-              _alreadyConnecting = false;
-            });
-          }
+        if (state == BluetoothConnectionState.disconnected && mounted) {
+          setState(() {
+            _status = 'تم فصل الاتصال';
+            _heartRate = 0;
+            _isConnecting = false;
+            _alreadyConnecting = false;
+          });
         }
       });
 
@@ -118,59 +130,60 @@ class _HeartRateScreenState extends State<HeartRateScreen> {
       BluetoothCharacteristic? writeChar;
       BluetoothCharacteristic? notifyChar;
 
-      for (var service in services) {
-        for (var char in service.characteristics) {
+      for (final service in services) {
+        for (final char in service.characteristics) {
           final uuid = char.uuid.toString().toLowerCase();
-          if (uuid.contains("ff02")) writeChar = char;
-          if (uuid.contains("6e400003")) notifyChar = char;
+          if (uuid.contains(_writeCharUuid)) writeChar = char;
+          if (uuid.contains(_notifyCharUuid)) notifyChar = char;
         }
       }
 
       if (notifyChar != null) {
         await notifyChar.setNotifyValue(true);
-
-        hrSub = notifyChar.lastValueStream.listen(
-          (value) {
-            if (value.isEmpty) return;
-            if (value.length == 1 && value[0] >= 40 && value[0] <= 200) {
-              if (mounted) {
-                setState(() {
-                  heartRate = value[0];
-                  status = "متصل بالساعة ❤️";
-                  _messageIndex++; // ✅ رسالة جديدة مع كل قياس
-                });
-              }
-            }
-          },
-          onError: (e) => print("❌ error: $e"),
+        _hrSub = notifyChar.lastValueStream.listen(
+          _onHeartRateReceived,
           cancelOnError: false,
         );
       }
 
-      if (writeChar != null) {
-        await writeChar.write([0x15, 0x01, 0x01], withoutResponse: true);
-      }
+      await writeChar?.write(_heartRateCommand, withoutResponse: true);
+
     } catch (e) {
       if (mounted) {
         setState(() {
-          status = "فشل الاتصال: $e";
-          isConnecting = false;
+          _status = 'فشل الاتصال: $e';
+          _isConnecting = false;
           _alreadyConnecting = false;
         });
       }
     }
   }
 
-  String getMessage() {
-    if (heartRate == 0) return "مستعدين نبدأ؟ 😊";
+  void _onHeartRateReceived(List<int> value) {
+    if (value.isEmpty) return;
+    if (value.length == 1 &&
+        value[0] >= _heartRateMin &&
+        value[0] <= _heartRateMax) {
+      if (mounted) {
+        setState(() {
+          _heartRate = value[0];
+          _status = 'متصل بالساعة ❤️';
+          _messageIndex++;
+        });
+      }
+    }
+  }
+
+  String _getMessage() {
+    if (_heartRate == 0) return 'مستعدين نبدأ؟ 😊';
     return _messages[_messageIndex % _messages.length];
   }
 
   @override
   void dispose() {
-    hrSub?.cancel();
-    scanSub?.cancel();
-    connectedDevice?.disconnect();
+    _hrSub?.cancel();
+    _scanSub?.cancel();
+    _connectedDevice?.disconnect();
     super.dispose();
   }
 
@@ -188,12 +201,12 @@ class _HeartRateScreenState extends State<HeartRateScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(status, style: const TextStyle(color: Colors.white70)),
+            Text(_status, style: const TextStyle(color: Colors.white70)),
             const SizedBox(height: 40),
             AnimatedContainer(
               duration: const Duration(milliseconds: 500),
-              height: heartRate > 0 ? 200 : 140,
-              width: heartRate > 0 ? 200 : 140,
+              height: _heartRate > 0 ? 200 : 140,
+              width: _heartRate > 0 ? 200 : 140,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: Colors.white.withOpacity(0.1),
@@ -201,8 +214,8 @@ class _HeartRateScreenState extends State<HeartRateScreen> {
                   BoxShadow(
                     color: Colors.red.withOpacity(0.6),
                     blurRadius: 30,
-                    spreadRadius: heartRate > 0 ? 10 : 2,
-                  )
+                    spreadRadius: _heartRate > 0 ? 10 : 2,
+                  ),
                 ],
               ),
               child: Column(
@@ -210,13 +223,17 @@ class _HeartRateScreenState extends State<HeartRateScreen> {
                 children: [
                   const Icon(Icons.favorite, color: Colors.white, size: 50),
                   Text(
-                    heartRate > 0 ? "$heartRate" : "...",
+                    _heartRate > 0 ? '$_heartRate' : '...',
                     style: const TextStyle(
-                        fontSize: 45,
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold),
+                      fontSize: 45,
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                  const Text("BPM", style: TextStyle(color: Colors.white60)),
+                  const Text(
+                    'BPM',
+                    style: TextStyle(color: Colors.white60),
+                  ),
                 ],
               ),
             ),
@@ -224,20 +241,21 @@ class _HeartRateScreenState extends State<HeartRateScreen> {
             Padding(
               padding: const EdgeInsets.all(20),
               child: Text(
-                getMessage(),
+                _getMessage(),
                 textAlign: TextAlign.center,
                 style: const TextStyle(
-                    fontSize: 22,
-                    color: Colors.white,
-                    fontWeight: FontWeight.w300),
+                  fontSize: 22,
+                  color: Colors.white,
+                  fontWeight: FontWeight.w300,
+                ),
               ),
             ),
             const SizedBox(height: 30),
-            if (heartRate == 0 && !isConnecting)
+            if (_heartRate == 0 && !_isConnecting)
               ElevatedButton.icon(
-                onPressed: startListening,
+                onPressed: _startListening,
                 icon: const Icon(Icons.bluetooth),
-                label: const Text("ابدأ القياس"),
+                label: const Text('ابدأ القياس'),
               ),
           ],
         ),
