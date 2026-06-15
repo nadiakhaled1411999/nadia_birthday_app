@@ -17,33 +17,35 @@
 ## ✨ Overview
 
 A Flutter mobile app that connects to a **K8 smartwatch** via **Bluetooth Low Energy** to display your heart rate live on screen — with animated visuals and motivational messages that update with every new reading.
+
+screen1
 ![ <img width="738" height="1600" alt="1" src="https://github.com/user-attachments/assets/f7de47fb-1fd4-42ee-92e1-0d7613a0b617" />
 ] 
-
+screen2
  ![ <img width="738" height="1600" alt="2" src="https://github.com/user-attachments/assets/907ac1a9-f8fd-4020-b191-bbd64d7a42e5" />
 
 ] 
 
-
+Screen3
 
 ![ <img width="738" height="1600" alt="3" src="https://github.com/user-attachments/assets/e4e208d5-615e-432a-a88a-8aa508bd29aa" />
 
 ] 
 
-
+screen4
 
 ![  <img width="738" height="1600" alt="4" src="https://github.com/user-attachments/assets/9b16bd9f-cb90-4355-9b33-509171cf465c" />
 
 ] 
 
-
+screen5
 
 ![ <img width="738" height="1600" alt="5" src="https://github.com/user-attachments/assets/b8845f75-790d-4a4d-b045-9bf8b6c806c0" />
 
 ] 
 
 
-
+screen6
 ![  <img width="738" height="1600" alt="6" src="https://github.com/user-attachments/assets/bce32ae7-a27e-4cc8-9880-a18d34b5c47d" />
 
 ] 
