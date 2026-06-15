@@ -1,7 +1,7 @@
 
 <div align="center">
 
-# 💓 Heart Rate Monitor
+# 💓  Bluetooth Heart Rate Monitor
 
 > *A Flutter app that reads your heart rate in real-time via Bluetooth Low Energy*
 
