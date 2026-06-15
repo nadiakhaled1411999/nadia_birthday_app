@@ -1,4 +1,4 @@
-# nadia_birthday_app
+<img width="738" height="1600" alt="2" src="https://github.com/user-attachments/assets/28ac4349-387d-4c8d-8502-c53bab80d47e" /><img width="738" height="1600" alt="2" src="https://github.com/user-attachments/assets/4971ce86-4090-44bd-8c8f-93be2841d907" /># nadia_birthday_app
  
 <div align="center">
 
@@ -20,6 +20,9 @@
 A Flutter mobile app that connects to a **K8 smartwatch** via **Bluetooth Low Energy** to display your heart rate live on screen — with animated visuals and motivational messages that update with every new reading.
 ![ <img width="738" height="1600" alt="1" src="https://github.com/user-attachments/assets/f7de47fb-1fd4-42ee-92e1-0d7613a0b617" />
 ] 
+
+![]( ![Uploading 2.jpeg…]
+) 
 ```
 K8 Watch  ──BLE──▶  App  ──▶  Live BPM Display + Motivational Message
 ```
