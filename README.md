@@ -1,4 +1,4 @@
- 
+
 <div align="center">
 
 # 💓 Heart Rate Monitor
@@ -18,16 +18,12 @@
 
 A Flutter mobile app that connects to a **K8 smartwatch** via **Bluetooth Low Energy** to display your heart rate live on screen — with animated visuals and motivational messages that update with every new reading.
 
- 
- | | | |
-|---|---|---|
-| <img src=" ="https://github.com/user-attachments/assets/1bb66219-8080-4677-852a-6bd31da84551"
-  width="200" />
-  | <img src="https://github.com/user-attachments/assets/907ac1a9-f8fd-4020-b191-bbd64d7a42e5" width="300"/> | <img src="https://github.com/user-attachments/assets/e4e208d5-615e-432a-a88a-8aa508bd29aa" width="300"/> |
-| <img src="https://github.com/user-attachments/assets/9b16bd9f-cb90-4355-9b33-509171cf465c" width="300"/> | <img src="https://github.com/user-attachments/assets/b8845f75-790d-4a4d-b045-9bf8b6c806c0" width="300"/> | <img src="https://github.com/user-attachments/assets/bce32ae7-a27e-4cc8-9880-a18d34b5c47d" width="300"/> |
 
- د
- 
+  | | | |
+|---|---|---|
+| <img src="assets/1.jpeg" width="200"/> | <img src="assets/2.jpeg" width="200"/> | <img src="assets/3.jpeg" width="200"/> |
+| <img src="assets/4.jpeg" width="200"/> | <img src="assets/5.jpeg" width="200"/> | <img src="assets/6.jpeg" width="200"/> |
+
 ```
 K8 Watch  ──BLE──▶  App  ──▶  Live BPM Display + Motivational Message
 ```
