@@ -20,8 +20,8 @@ A Flutter mobile app that connects to a **K8 smartwatch** via **Bluetooth Low En
 ![ <img width="738" height="1600" alt="1" src="https://github.com/user-attachments/assets/f7de47fb-1fd4-42ee-92e1-0d7613a0b617" />
 ] 
 
-![2]( <img width="738" height="1600" alt="2" src="https://github.com/user-attachments/assets/506e7e7f-5df8-4a3b-b429-6c52de9bb986" />
- )
+![<img width="738" height="1600" alt="2" src="https://github.com/user-attachments/assets/506e7e7f-5df8-4a3b-b429-6c52de9bb986" />
+ د
  
 ```
 K8 Watch  ──BLE──▶  App  ──▶  Live BPM Display + Motivational Message
