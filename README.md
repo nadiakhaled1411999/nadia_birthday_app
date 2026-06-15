@@ -21,8 +21,8 @@ A Flutter mobile app that connects to a **K8 smartwatch** via **Bluetooth Low En
  
  | | | |
 |---|---|---|
-| <img src="img width="738" height="1600" alt="1" src="https://github.com/user-attachments/assets/1bb66219-8080-4677-852a-6bd31da84551"
- " width="200" />
+| <img src=" ="https://github.com/user-attachments/assets/1bb66219-8080-4677-852a-6bd31da84551"
+  width="200" />
   | <img src="https://github.com/user-attachments/assets/907ac1a9-f8fd-4020-b191-bbd64d7a42e5" width="300"/> | <img src="https://github.com/user-attachments/assets/e4e208d5-615e-432a-a88a-8aa508bd29aa" width="300"/> |
 | <img src="https://github.com/user-attachments/assets/9b16bd9f-cb90-4355-9b33-509171cf465c" width="300"/> | <img src="https://github.com/user-attachments/assets/b8845f75-790d-4a4d-b045-9bf8b6c806c0" width="300"/> | <img src="https://github.com/user-attachments/assets/bce32ae7-a27e-4cc8-9880-a18d34b5c47d" width="300"/> |
 
