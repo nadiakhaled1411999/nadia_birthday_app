@@ -201,7 +201,7 @@ class _HeartRateScreenState extends State<HeartRateScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(_status, style: const TextStyle(color: Colors.white70)),
+            Text(_status, style: const TextStyle(color: Colors.white70, fontSize: 18)),
             const SizedBox(height: 40),
             AnimatedContainer(
               duration: const Duration(milliseconds: 500),
