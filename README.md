@@ -21,7 +21,8 @@ A Flutter mobile app that connects to a **K8 smartwatch** via **Bluetooth Low En
  
  | | | |
 |---|---|---|
-| <img src="https://github.com/user-attachments/assets/f7de47fb-1fd4-42ee-92e1-0d7613a0b617" width="300"/> | <img src="https://github.com/user-attachments/assets/907ac1a9-f8fd-4020-b191-bbd64d7a42e5" width="300"/> | <img src="https://github.com/user-attachments/assets/e4e208d5-615e-432a-a88a-8aa508bd29aa" width="300"/> |
+| <img src=" <img width="738" height="1600" alt="11" src="https://github.com/user-attachments/assets/7c95949d-7ad0-46c3-be17-7f0f51d018d0" />
+" width="300"/> | <img src="https://github.com/user-attachments/assets/907ac1a9-f8fd-4020-b191-bbd64d7a42e5" width="300"/> | <img src="https://github.com/user-attachments/assets/e4e208d5-615e-432a-a88a-8aa508bd29aa" width="300"/> |
 | <img src="https://github.com/user-attachments/assets/9b16bd9f-cb90-4355-9b33-509171cf465c" width="300"/> | <img src="https://github.com/user-attachments/assets/b8845f75-790d-4a4d-b045-9bf8b6c806c0" width="300"/> | <img src="https://github.com/user-attachments/assets/bce32ae7-a27e-4cc8-9880-a18d34b5c47d" width="300"/> |
 
  د
